@@ -14,6 +14,8 @@ class Config(object):
         self.DEBUG = True
         self.TESTING = False
         self.THREADED = False
+        self.LOGGER_NAME = 'stderr'
+        self.LOGGER_SYSLOGTAG = 'FLASK_TRUSS'
 
         # SQLAlchemy settings
         self.SQLALCHEMY_RECORD_QUERIES = False

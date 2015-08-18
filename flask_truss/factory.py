@@ -1,6 +1,3 @@
-import logging
-from logging.handlers import SysLogHandler
-
 from werkzeug.contrib.fixers import ProxyFix
 from celery import Celery
 from flask import Flask
@@ -14,6 +11,8 @@ from flask_truss.models.base import db
 from flask_truss.models.user import User, Anonymous
 from flask_truss.crypt import bcrypt
 from flask_truss.admin import admin_extension
+from flask_truss.logger import init_logger
+
 
 login_manager = LoginManager()
 debug_toolbar = DebugToolbarExtension()
@@ -30,9 +29,8 @@ def create_base_app(config):
     app.config.from_object(config)
     config.init_app(app)
 
-    file_handler = SysLogHandler()
-    file_handler.setLevel(logging.WARNING)
-    app.logger.addHandler(file_handler)
+    app._logger = init_logger(syslogtag=app.config['LOGGER_SYSLOGTAG'],
+                              logger_name=app.config['LOGGER_NAME'])
 
     db.init_app(app)
     bcrypt.init_app(app)
