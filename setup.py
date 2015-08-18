@@ -18,6 +18,7 @@ setup(
         'Flask-Debugtoolbar',
         'Flask-JSONTools',
         'Flask-Login',
+        'Flask-Migrate',
         'Flask-Script',
         'Flask-SQLAlchemy',
         'Flask-Testing',

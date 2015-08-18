@@ -1,12 +1,17 @@
 from flask.ext.script import Manager
+from flask.ext.migrate import Migrate, MigrateCommand
+
 
 from flask_truss.factory import create_app
 from flask_truss.conf.app import Config
 from flask_truss.async.base import celery_instance
+from flask_truss.models.base import db
+
 
 config = Config()
 app = create_app(config)
 manager = Manager(app)
+migrate = Migrate(app, db)
 
 
 def make_shell_context():
@@ -46,6 +51,9 @@ def worker(queues, concurrency, loglevel=None):
     """Run a celery worker process locally"""
     worker = celery_instance.Worker(queues=queues, concurrency=concurrency, loglevel=loglevel, **app.config)
     worker.start()
+
+
+manager.add_command('db', MigrateCommand)
 
 
 if __name__ == "__main__":
