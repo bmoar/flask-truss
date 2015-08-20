@@ -14,10 +14,6 @@ manager = Manager(app)
 migrate = Migrate(app, db)
 
 
-def make_shell_context():
-    return dict(app=app)
-
-
 @manager.shell
 def make_shell_context():
     """IPython session with app loaded"""

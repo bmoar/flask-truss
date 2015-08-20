@@ -7,11 +7,11 @@ from flask.ext.login import LoginManager
 
 from flask_truss.conf.app import Config
 from flask_truss.lib.custom_json_encoder import CustomJSONEncoder
+from flask_truss.lib.logger import init_logger
 from flask_truss.models.base import db
 from flask_truss.models.user import User, Anonymous
 from flask_truss.crypt import bcrypt
 from flask_truss.admin import admin_extension
-from flask_truss.libs.logger import init_logger
 
 
 login_manager = LoginManager()
