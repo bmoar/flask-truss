@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, current_app, request
 
 from flask_truss.async._task import _task
-from flask_truss.libs.logger import log_flask_request
+from flask_truss.lib.logger import log_flask_request
 
 
 _blueprint = Blueprint('_blueprint', __name__, template_folder='templates')
