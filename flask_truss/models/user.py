@@ -1,7 +1,7 @@
 from flask.ext.login import UserMixin
 
 from flask_truss.models.base import BaseModel, db
-from flask_truss.crypt import bcrypt
+from passlib.hash import bcrypt
 
 
 class Anonymous(UserMixin):
@@ -33,4 +33,4 @@ class User(UserMixin, BaseModel):
     @password.setter
     def password(self, new_password):
         """Automatically salt and hash the provided password."""
-        self.pass_hash = bcrypt.generate_password_hash(new_password)
+        self.pass_hash = bcrypt.encrypt(new_password)

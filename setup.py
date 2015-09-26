@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from setuptools import setup, find_packages
 
 setup(
@@ -11,13 +13,13 @@ setup(
         'static': 'flask_truss/static/*'
     },
     install_requires=[
+        'bcrypt',
         'celery',
         'coverage',
         'Flask-Admin',
-        'Flask-Bcrypt',
         'Flask-Debugtoolbar',
-        'Flask-JSONTools',
         'Flask-Login',
+        'Flask-Marshmallow',
         'Flask-Migrate',
         'Flask-Script',
         'Flask-SQLAlchemy',
@@ -26,10 +28,11 @@ setup(
         'Flask',
         'ipdb',
         'ipython',
+        'marshmallow-sqlalchemy',
         'nose',
         'paramiko',
+        'passlib',
         'psycopg2',
-        'py-bcrypt',
         'python-dateutil',
         'pytz',
         'randomize',

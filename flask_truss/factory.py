@@ -2,15 +2,13 @@ from werkzeug.contrib.fixers import ProxyFix
 from celery import Celery
 from flask import Flask
 from flask.ext.debugtoolbar import DebugToolbarExtension
-
 from flask.ext.login import LoginManager
 
 from flask_truss.conf.app import Config
-from flask_truss.lib.custom_json_encoder import CustomJSONEncoder
+from flask_truss.admin import admin_extension
+from flask_truss.marshmallow import marshmallow
 from flask_truss.models.base import db
 from flask_truss.models.user import User, Anonymous
-from flask_truss.crypt import bcrypt
-from flask_truss.admin import admin_extension
 from flask_truss.libs.logger import init_logger
 
 
@@ -32,8 +30,8 @@ def create_base_app(config):
     app._logger = init_logger(syslogtag=app.config['LOGGER_SYSLOGTAG'],
                               logger_name=app.config['LOGGER_NAME'])
 
+    marshmallow.init_app(app)
     db.init_app(app)
-    bcrypt.init_app(app)
 
     if app.config['DEBUG']:
         admin_extension.init_app(app)
@@ -41,13 +39,12 @@ def create_base_app(config):
 
     login_manager.init_app(app)
     login_manager.anonymous_user = Anonymous
-    # Change these views to fit your app
+    # Change these views to fit your app.
+    # Use flask_truss.auth.attempt_login to login a user.
     login_manager.login_view = "auth.login"
     login_manager.refresh_view = "auth.login"
     login_manager.login_message = "You do not have access to that page."
     login_manager.user_loader(load_user)
-
-    app.json_encoder = CustomJSONEncoder
 
     return app
 
@@ -73,7 +70,7 @@ def register_blueprints(app):
 
 
 def create_app(config):
-    """Produce ready with all config settings, blueprints, and the ProxyFix"""
+    """Produce an application ready with all config settings, blueprints, and the ProxyFix"""
     app = create_base_app(config)
     app = register_blueprints(app)
     # Apply the ProxyFix so that requests get the correct headers. Change if not using a proxy.

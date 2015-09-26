@@ -1,4 +1,4 @@
-from flask_truss.tests.unit import BaseTestCase
+from flask_truss.tests.integrations import BaseTestCase
 from flask_truss.models.user import User, Anonymous
 
 

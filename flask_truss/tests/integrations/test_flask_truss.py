@@ -1,4 +1,4 @@
-from flask_truss.tests.unit import BaseTestCase
+from flask_truss.tests.integrations import BaseTestCase
 
 
 class TestFlaskTruss(BaseTestCase):

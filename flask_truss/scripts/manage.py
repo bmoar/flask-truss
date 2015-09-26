@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 
@@ -14,25 +16,10 @@ manager = Manager(app)
 migrate = Migrate(app, db)
 
 
-def make_shell_context():
-    return dict(app=app)
-
-
 @manager.shell
 def make_shell_context():
     """IPython session with app loaded"""
     return dict(app=app)
-
-
-@manager.option('-n', '--nose_arguments', dest='nose_arguments', required=False,
-                help="List of arguments to pass to nose. First argument MUST be ''",
-                default=['', '--with-coverage', '--cover-package=flask_truss'])
-def test(nose_arguments):
-    """Run nosetests with the given arguments and report coverage"""
-    assert nose_arguments[0] == ''
-    import nose
-    from nose.plugins.cover import Coverage
-    nose.main(argv=nose_arguments, addplugins=[Coverage()])
 
 
 @manager.command
@@ -49,8 +36,8 @@ def runserver():
                 help="DEBUG, INFO, WARN, ERROR, CRITICAL, FATAL")
 def worker(queues, concurrency, loglevel=None):
     """Run a celery worker process locally"""
-    worker = celery_instance.Worker(queues=queues, concurrency=concurrency, loglevel=loglevel, **app.config)
-    worker.start()
+    celery_worker = celery_instance.Worker(queues=queues, concurrency=concurrency, loglevel=loglevel, **app.config)
+    celery_worker.start()
 
 
 manager.add_command('db', MigrateCommand)
