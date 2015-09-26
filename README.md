@@ -35,21 +35,21 @@ Run `python manage.py` to get the list of available commands. Run `python manage
 information about the command and arguments.
 
 ##Migrations
-Run `python manage.py db` and manage your schema sanely. See the
+Run `python manage.py db` and manage your database schemas sanely. See the
 [Flask-Migrate](https://flask-migrate.readthedocs.org/en/latest/) docs and the 
 [Alembic](https://alembic.readthedocs.org/en/latest/) docs.
 
 ##Celery
-Run `python manage.py worker` for a simple worker to consume off the queue.
+Run `python manage.py worker` for a simple worker to consume off the queue. Read `manage.py` for additional options.
 
-##Admin interface
-By default, navigate to `localhost:5000/admin`. See appname/appname/admin.py for how to add models.
+##Admin Interface
+By default, navigate to `localhost:5000/admin`. See `appname/appname/admin.py` for how to add models.
 
 ##Testing
 This project uses nose and unittest. Run all of the tests with `./nosetests.sh`, or specific tests with 
-`./noseetests.sh appname/tests/unit/`. Tests are split into unit and integration tests. Unit tests are self-contained
+`./nosetests.sh appname/tests/unit/`. Tests are split into unit and integration tests. Unit tests are self-contained
 and require no third party interactions. Integration tests rely on configuration, external services, flask, database, or
-any other services.
+any other services. By default, this command will run nosetests with coverage and cover-branches.
 
 ##Notes
 This boilerplate is by no means complete. I've included an example start of a blueprint, a user model, and a celery
