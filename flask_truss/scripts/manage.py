@@ -25,7 +25,7 @@ def make_shell_context():
 @manager.command
 def runserver():
     """Run the Flask development server with the config's settings"""
-    app.run(port=config.PORT, debug=config.DEBUG, threaded=config.THREADED)
+    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG, threaded=config.THREADED)
 
 
 @manager.option('-Q', '--queues', dest='queues', required=False, default='celery',

@@ -29,7 +29,7 @@ class Config(object):
 
         # Celery settings
         self.BROKER_URL = 'amqp://user:password@host/'
-        self.CELERY_IMPORTS = ('async._task', )
+        self.CELERY_IMPORTS = ('flask_truss.async._task', )
         self.CELERY_TASK_SERIALIZER = 'json'
         self.CELERY_RESULT_SERIALIZER = 'json'
         self.CELERY_ACCEPT_CONTENT = ['json']
