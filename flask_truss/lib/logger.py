@@ -1,5 +1,10 @@
 import os
+import time
+from random import randint
+from functools import wraps
+from flask import current_app, request
 
+import statsd
 
 class SyslogtagFilter(object):
     """ Injects a syslogtag into a log format """
@@ -93,16 +98,63 @@ def init_logger(syslogtag='FLASK_TRUSS', logger_name='stderr'):
 
     return logging.getLogger(logger_name)
 
-def log_flask_request(flask_app=None, request=None):
-    """ logs a request from a flask app
-    :param flask_app: a Flask app object (should be current_app from flask side)
-    :param request: the flask request object to log
-    """
-    flask_app.logger.info('request="{0}", url="{1}"'.format(hex(id(request)), request.url))
-    flask_app.logger.info('request="{0}", endpoint="{1}"'.format(hex(id(request)), request.endpoint))
-    flask_app.logger.info('request="{0}", data="{1}"'.format(hex(id(request)), request.data))
-    flask_app.logger.info('request="{0}", method="{1}"'.format(hex(id(request)), request.method))
-    flask_app.logger.info('request="{0}", headers="{1}"'.format(hex(id(request)), request.headers))
-    flask_app.logger.info('request="{0}", cookies="{1}"'.format(hex(id(request)), request.cookies))
-    flask_app.logger.info('request="{0}", values="{1}"'.format(hex(id(request)), request.values))
-    flask_app.logger.info('request="{0}", files="{1}"'.format(hex(id(request)), request.files))
+def is_logged(log_percent=1):
+    return True if randint(0, 100) < (100 * log_percent) else False
+
+def flask_endpoint(log_percent=1.00, is_active=True):
+    ''' log a flask endpoint
+
+        :param: :log_percent - what % of requests we want to log, 1.00 = 100%, 0.10 = 10%
+
+        When in debug mode, we log the flask request recieved, exec time of endpoint
+    '''
+    def decorate(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if is_active and is_logged(log_percent):
+                # statsd first to ensure we get a hit ping
+                sdclient = statsd.StatsClient(
+                        current_app.config['STATSD_HOST'],
+                        current_app.config['STATSD_PORT'])
+                prefix = '{0}.stats.endpoint.{1}'.format(current_app.config['MODULE_NAME'], func.__qualname__)
+                sdclient.incr('{0}.hits'.format(prefix))
+                # generate log message for syslog
+                log_msg = '''\
+    pid="{0}",
+    request="{1}",
+    url="{2}",
+    endpoint="{3}",
+    func="{4}",
+    data="{5}",
+    method="{6}",
+    headers="{7}",
+    cookies="{8}",
+    values="{9}",
+    files="{10}",
+        '''.format(os.getpid(),
+                hex(id(request)),
+                request.url,
+                request.endpoint,
+                func.__qualname__,
+                request.data,
+                request.method,
+                request.headers,
+                request.cookies,
+                request.values,
+                request.files)
+
+                # performance timing
+                time_start = time.perf_counter()
+                result = func(*args, **kwargs)
+                time_end = time.perf_counter()
+                timing = time_end - time_start
+
+                # log timing results
+                current_app.logger.info(log_msg + 'exec_time="{0}"'.format(timing))
+                sdclient.timing('{0}.exec_time'.format(prefix), timing)
+
+                return result
+            else:
+                return func(*args, **kwargs)
+        return wrapper
+    return decorate

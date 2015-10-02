@@ -14,8 +14,13 @@ class Config(object):
         self.DEBUG = True
         self.TESTING = False
         self.THREADED = False
-        self.LOGGER_NAME = 'stderr'
-        self.LOGGER_SYSLOGTAG = 'FLASK_TRUSS'
+
+        # logging and performance
+        self.MODULE_NAME = __name__.split('.', 1)[0]
+        self.LOGGER_NAME = 'debug'
+        self.LOGGER_SYSLOGTAG = self.MODULE_NAME.upper()
+        self.STATSD_HOST = 'localhost'
+        self.STATSD_PORT = 8125
 
         # SQLAlchemy settings
         self.SQLALCHEMY_RECORD_QUERIES = False
