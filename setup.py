@@ -10,7 +10,8 @@ setup(
     include_package_data=True,
     package_data={
         'templates': 'flask_truss/templates/*',
-        'static': 'flask_truss/static/*'
+        'static': 'flask_truss/static/*',
+        'scripts': 'flask_truss/scripts/migrations/*'
     },
     install_requires=[
         'bcrypt',
@@ -44,5 +45,11 @@ setup(
     test_suite='nose.collector',
     classifiers=[
         'Private :: Do Not Upload'
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'manage = flask_truss.scripts.manage:main_manager',
+            'app = flask_truss.scripts.manage:main_app',
+        ]
+    }
 )

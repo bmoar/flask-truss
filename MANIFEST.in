@@ -1,2 +1,3 @@
 recursive-include flask_truss/templates *
 recursive-include flask_truss/static *
+recursive-include flask_truss/scripts/migrations *

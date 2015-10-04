@@ -1,13 +1,14 @@
 import os
 import time
+import statsd
 from random import randint
 from functools import wraps
+
 from flask import current_app, request
 
-import statsd
 
 class SyslogtagFilter(object):
-    """ Injects a syslogtag into a log format """
+    """Injects a syslogtag into a log format"""
 
     def __init__(self, syslogtag):
         self.syslogtag = syslogtag
@@ -26,70 +27,70 @@ def init_logger(syslogtag='FLASK_TRUSS', logger_name='stderr'):
     from logging import config
 
     logger_dict = {
-            'version': 1,
-            'disable_existing_loggers': False,
-            'filters': {
-                'syslogtag': {
-                    '()': SyslogtagFilter,
-                    'syslogtag': syslogtag,
-                    },
-                },
-            'formatters': {
-                'detailed': {
-                    'format': '[%(syslogtag)s] [%(levelname)s] (%(filename)s:%(funcName)s:%(lineno)s) %(message)s'
-                    },
-                },
-            'handlers': {
-                'stderr': {
-                    'class': 'logging.StreamHandler',
-                    'stream': 'ext://sys.stderr',
-                    'formatter': 'detailed',
-                    'filters': ['syslogtag'],
-                    },
-                'syslog': {
-                    'class': 'logging.handlers.SysLogHandler',
-                    'address': '/dev/log' if os.path.exists('/dev/log') else '/var/run/syslog',
-                    'formatter': 'detailed',
-                    'filters': ['syslogtag'],
-                    },
-                },
-            'loggers': {
-                'stderr': {
-                    'level': 'INFO',
-                    'handlers': ['stderr'],
-                    'propagate': False,
-                    },
-                'stderr_syslog': {
-                    'level': 'INFO',
-                    'handlers': ['stderr', 'syslog'],
-                    'propagate': False,
-                    },
-                'debug': {
-                    'level': 'DEBUG',
-                    'handlers': ['stderr'],
-                    'propagate': False,
-                    },
-                'debug_syslog': {
-                    'level': 'DEBUG',
-                    'handlers': ['stderr', 'syslog'],
-                    'propagate': False,
-                    },
-                'prod': {
-                    'level': 'INFO',
-                    'handlers': ['syslog'],
-                    'propagate': False,
-                    },
-                'prod_debug': {
-                    'level': 'DEBUG',
-                    'handlers': ['syslog'],
-                    'propagate': False,
-                    },
-                },
-            'root': {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'filters': {
+            'syslogtag': {
+                '()': SyslogtagFilter,
+                'syslogtag': syslogtag,
+            },
+        },
+        'formatters': {
+            'detailed': {
+                'format': '[%(syslogtag)s] [%(levelname)s] (%(filename)s:%(funcName)s:%(lineno)s) %(message)s'
+            },
+        },
+        'handlers': {
+            'stderr': {
+                'class': 'logging.StreamHandler',
+                'stream': 'ext://sys.stderr',
+                'formatter': 'detailed',
+                'filters': ['syslogtag'],
+            },
+            'syslog': {
+                'class': 'logging.handlers.SysLogHandler',
+                'address': '/dev/log' if os.path.exists('/dev/log') else '/var/run/syslog',
+                'formatter': 'detailed',
+                'filters': ['syslogtag'],
+            },
+        },
+        'loggers': {
+            'stderr': {
                 'level': 'INFO',
                 'handlers': ['stderr'],
-                },
-            }
+                'propagate': False,
+            },
+            'stderr_syslog': {
+                'level': 'INFO',
+                'handlers': ['stderr', 'syslog'],
+                'propagate': False,
+            },
+            'debug': {
+                'level': 'DEBUG',
+                'handlers': ['stderr'],
+                'propagate': False,
+            },
+            'debug_syslog': {
+                'level': 'DEBUG',
+                'handlers': ['stderr', 'syslog'],
+                'propagate': False,
+            },
+            'prod': {
+                'level': 'INFO',
+                'handlers': ['syslog'],
+                'propagate': False,
+            },
+            'prod_debug': {
+                'level': 'DEBUG',
+                'handlers': ['syslog'],
+                'propagate': False,
+            },
+        },
+        'root': {
+            'level': 'INFO',
+            'handlers': ['stderr'],
+        },
+    }
     logging.config.dictConfig(logger_dict)
 
     if logger_dict['loggers'][logger_name]['level'] == 'DEBUG':
@@ -98,24 +99,27 @@ def init_logger(syslogtag='FLASK_TRUSS', logger_name='stderr'):
 
     return logging.getLogger(logger_name)
 
+
 def is_logged(log_percent=1):
     return True if randint(0, 100) < (100 * log_percent) else False
 
+
 def flask_endpoint(log_percent=1.00, is_active=True):
-    ''' log a flask endpoint
+    """log a flask endpoint
 
-        :param: :log_percent - what % of requests we want to log, 1.00 = 100%, 0.10 = 10%
+    :param: :log_percent - what % of requests we want to log, 1.00 = 100%, 0.10 = 10%
 
-        When in debug mode, we log the flask request recieved, exec time of endpoint
-    '''
+    When in debug mode, we log the flask request received, exec time of endpoint
+    """
+
     def decorate(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             if is_active and is_logged(log_percent):
                 # statsd first to ensure we get a hit ping
                 sdclient = statsd.StatsClient(
-                        current_app.config['STATSD_HOST'],
-                        current_app.config['STATSD_PORT'])
+                    current_app.config['STATSD_HOST'],
+                    current_app.config['STATSD_PORT'])
                 prefix = '{0}.stats.endpoint.{1}'.format(current_app.config['MODULE_NAME'], func.__qualname__)
                 sdclient.incr('{0}.hits'.format(prefix))
                 # generate log message for syslog
@@ -132,16 +136,16 @@ def flask_endpoint(log_percent=1.00, is_active=True):
     values="{9}",
     files="{10}",
         '''.format(os.getpid(),
-                hex(id(request)),
-                request.url,
-                request.endpoint,
-                func.__qualname__,
-                request.data,
-                request.method,
-                request.headers,
-                request.cookies,
-                request.values,
-                request.files)
+                   hex(id(request)),
+                   request.url,
+                   request.endpoint,
+                   func.__qualname__,
+                   request.data,
+                   request.method,
+                   request.headers,
+                   request.cookies,
+                   request.values,
+                   request.files)
 
                 # performance timing
                 time_start = time.perf_counter()
@@ -156,5 +160,7 @@ def flask_endpoint(log_percent=1.00, is_active=True):
                 return result
             else:
                 return func(*args, **kwargs)
+
         return wrapper
+
     return decorate
