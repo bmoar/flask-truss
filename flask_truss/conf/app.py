@@ -24,6 +24,7 @@ class Config(object):
 
         # SQLAlchemy settings
         self.SQLALCHEMY_RECORD_QUERIES = False
+        self.SQLALCHEMY_TRACK_MODIFICATIONS = True
         self.SQLALCHEMY_ECHO = False
         self.SQLALCHEMY_COMMIT_ON_TEARDOWN = True
         self.SQLALCHEMY_DATABASE_URI = 'postgresql://user:password@host/database'

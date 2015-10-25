@@ -9,6 +9,7 @@ Another Flask boilerplate/template application.
 
 ##Included Libraries
 The full list can be found in `flask-truss/setup.py`:
+
 1. SQLAlchemy
 1. Alembic
 1. Marshmallow
@@ -66,7 +67,7 @@ and require no third party interactions. Integration tests rely on configuration
 any other services. By default, this command will run nosetests with coverage and cover-branches.
 
 ##Other Useful Bits
-1. `appname/appname/lib/logger.py` contains a decorator called `flask_endpoint`, written by @bmoar, that logs a 
+1. `appname/appname/lib/logger.py` contains a decorator called `log_endpoint`, written by @bmoar, that logs a 
 percentage of traffic that hits an endpoint.
 1. `appname/appname/setup.py` includes two 
 [entry points](https://pythonhosted.org/setuptools/setuptools.html#automatic-script-creation)

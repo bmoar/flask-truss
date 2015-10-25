@@ -1,21 +1,11 @@
-from flask.ext.login import UserMixin
+from flask.ext.login import AnonymousUserMixin, UserMixin
 
 from flask_truss.models.base import BaseModel, db
 from passlib.hash import bcrypt
 
 
-class Anonymous(UserMixin):
-    def is_authenticated(self):
-        return False
-
-    def is_active(self):
-        return False
-
-    def is_anonymous(self):
-        return True
-
-    def get_id(self):
-        return None
+class Anonymous(AnonymousUserMixin):
+    pass
 
 
 class User(UserMixin, BaseModel):
@@ -23,6 +13,7 @@ class User(UserMixin, BaseModel):
     __tablename__ = 'user_table'
 
     id = db.Column(db.Integer, primary_key=True)
+    user_name = db.Column(db.Text, nullable=False)
     pass_hash = db.Column(db.String(60), nullable=False)
 
     @property

@@ -14,7 +14,6 @@ setup(
         'scripts': 'flask_truss/scripts/migrations/*'
     },
     install_requires=[
-        'bcrypt',
         'celery',
         'coverage',
         'Flask-Admin',

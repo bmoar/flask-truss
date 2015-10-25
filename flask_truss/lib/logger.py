@@ -100,16 +100,14 @@ def init_logger(syslogtag='FLASK_TRUSS', logger_name='stderr'):
     return logging.getLogger(logger_name)
 
 
-def is_logged(log_percent=1):
+def is_logged(log_percent=1.00):
     return True if randint(0, 100) < (100 * log_percent) else False
 
 
-def flask_endpoint(log_percent=1.00, is_active=True):
-    """log a flask endpoint
+def log_endpoint(log_percent=1.00, is_active=True):
+    """log a flask endpoint a certain percentage of the time
 
     :param: :log_percent - what % of requests we want to log, 1.00 = 100%, 0.10 = 10%
-
-    When in debug mode, we log the flask request received, exec time of endpoint
     """
 
     def decorate(func):
@@ -117,9 +115,8 @@ def flask_endpoint(log_percent=1.00, is_active=True):
         def wrapper(*args, **kwargs):
             if is_active and is_logged(log_percent):
                 # statsd first to ensure we get a hit ping
-                sdclient = statsd.StatsClient(
-                    current_app.config['STATSD_HOST'],
-                    current_app.config['STATSD_PORT'])
+                sdclient = statsd.StatsClient(current_app.config['STATSD_HOST'],
+                                              current_app.config['STATSD_PORT'])
                 prefix = '{0}.stats.endpoint.{1}'.format(current_app.config['MODULE_NAME'], func.__qualname__)
                 sdclient.incr('{0}.hits'.format(prefix))
                 # generate log message for syslog
